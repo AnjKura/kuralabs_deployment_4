@@ -1,7 +1,7 @@
 pipeline {
   agent any
    stages {
-    stage ('Build') {
+     stage ('Build') {
       steps {
         sh '''#!/bin/bash
         python3 -m venv test3
@@ -13,7 +13,7 @@ pipeline {
         '''
      }
    }
-    stage ('test') {
+     stage ('test') {
       steps {
         sh '''#!/bin/bash
         source test3/bin/activate
@@ -58,9 +58,9 @@ pipeline {
                             }
          }
     }
-      stage('Destroy') {
-       steps {
-        withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'aws_access_key'), 
+        stage('Destroy') {
+          steps {
+          withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'aws_access_key'), 
                         string(credentialsId: 'AWS_SECRET_KEY', variable: 'aws_secret_key')]) {
                             dir('intTerraform') {
                               sh 'terraform destroy -auto-approve -var="aws_access_key=$aws_access_key"-var="aws_secret_key=$aws_secret_key"'
@@ -68,8 +68,6 @@ pipeline {
          }
     }
   }
-
-
    }
   }
  }
