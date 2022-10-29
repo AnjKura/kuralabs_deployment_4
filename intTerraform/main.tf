@@ -107,30 +107,6 @@ resource "aws_route_table_association" "route-subnet2" {
   subnet_id      = aws_subnet.pri_subnet1.id
   route_table_id = aws_route_table.route_table2.id
 }
-
-resource "aws_security_group" "web_ssh" {
-  name = "ssh-access"
-  description = "open ssh traffic"
-  vpc_id      = aws_vpc.test-vpc.id
-
-  ingress {
-    from_port = 22
-    to_port = 22
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-
-  }
-  egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    "Name" : "Web server001"
-    "Terraform" : "true"
-  }
   
 }
 
