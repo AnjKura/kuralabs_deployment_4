@@ -88,6 +88,7 @@ resource "aws_route_table" "route_table2" {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat_gateway_prob.id
   }
+}
 
 resource "aws_route_table_association" "route-subnet2" {
   subnet_id      = aws_subnet.subnet2.id
