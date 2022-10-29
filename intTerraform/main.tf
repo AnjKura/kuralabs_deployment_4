@@ -107,8 +107,6 @@ resource "aws_route_table_association" "route-subnet2" {
   subnet_id      = aws_subnet.pri_subnet1.id
   route_table_id = aws_route_table.route_table2.id
 }
-  
-}
 
 output "instance_ip" {
   value = aws_instance.web_server01.public_ip
