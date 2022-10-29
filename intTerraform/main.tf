@@ -14,6 +14,8 @@ resource "aws_instance" "web_server01" {
     subnet_id     = aws_subnet.subnet1.id
     key_name      = "newssh"
     vpc_security_group_ids = [aws_security_group.web_ssh.id]
+    
+    user_data = "${file("deploy.sh")}"
 
     tags = {
         "Name" : "Web-server-one"
@@ -21,6 +23,19 @@ resource "aws_instance" "web_server01" {
 
 }
 
+resource "aws_instance" "web_server02" {
+  ami                    = "ami-08c40ec9ead489470"
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.pri_subnet1.id
+  vpc_security_group_ids = [aws_security_group.web_ssh.id]
+
+  key_name = "newssh"
+
+  tags = {
+    "Name" : "Web-server-02"
+  }
+  
+}
 
 # VPC
 resource "aws_vpc" "test-vpc" {
@@ -44,17 +59,17 @@ resource "aws_nat_gateway" "nat_gateway_prob" {
 
 # SUBNET 1
 resource "aws_subnet" "subnet1" {
-  cidr_block              = "172.19.0.0/24"
+  cidr_block              = "172.19.0.0/18"
   vpc_id                  = aws_vpc.test-vpc.id
   map_public_ip_on_launch = "true"
   availability_zone       = data.aws_availability_zones.available.names[0]
 }
 
 # SUBNET 2
-resource "aws_subnet" "subnet2" {
-  cidr_block              = "172.19.255.0/24"
+resource "aws_subnet" "pri_subnet1" {
+  cidr_block              = "172.19.64.0/18"
   vpc_id                  = aws_vpc.test-vpc.id
-  map_public_ip_on_launch = "true"
+  map_public_ip_on_launch = "false"
   availability_zone       = data.aws_availability_zones.available.names[0]
 }
 
@@ -62,8 +77,6 @@ resource "aws_subnet" "subnet2" {
 resource "aws_internet_gateway" "gw_1" {
   vpc_id = aws_vpc.test-vpc.id
 }
-
-
 
 # ROUTE TABLE
 resource "aws_route_table" "route_table1" {
@@ -80,7 +93,7 @@ resource "aws_route_table_association" "route-subnet1" {
   route_table_id = aws_route_table.route_table1.id
 }
 
-# Public ROUTE TABLE 2
+# PRIVATE ROUTE TABLE
 resource "aws_route_table" "route_table2" {
   vpc_id = aws_vpc.test-vpc.id
 
@@ -91,8 +104,34 @@ resource "aws_route_table" "route_table2" {
 }
 
 resource "aws_route_table_association" "route-subnet2" {
-  subnet_id      = aws_subnet.subnet2.id
+  subnet_id      = aws_subnet.pri_subnet1.id
   route_table_id = aws_route_table.route_table2.id
+}
+
+resource "aws_security_group" "web_ssh" {
+  name = "ssh-access-Deploy4a"
+  description = "open ssh traffic"
+  vpc_id      = aws_vpc.test-vpc.id
+
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+
+  }
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    "Name" : "Web server001"
+    "Terraform" : "true"
+  }
+  
 }
 
 output "instance_ip" {
@@ -104,7 +143,6 @@ output "instance_ip" {
 data "aws_availability_zones" "available" {
   state = "available"
 }
-
 
 
 
